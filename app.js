@@ -8,6 +8,7 @@ var jwt = require('express-jwt')
 
 var indexRouter = require('./routes/index')
 var usersRouter = require('./routes/users')
+const { verifyToken } = require('./utils/auth')
 
 var app = express()
 
@@ -22,7 +23,22 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(
-  jwt({ secret: process.env.SECRET, algorithms: ['HS256'] }).unless({
+  jwt({
+    secret: process.env.SECRET,
+    algorithms: ['HS256'],
+    getToken: function fromHeaderOrQuerystring (req) {
+      if (
+        req.headers.authorization &&
+        req.headers.authorization.split(' ')[0] === 'Bearer'
+      ) {
+        const token = req.headers.authorization.split(' ')[1]
+        const decoded = verifyToken(token)
+        if (decoded.data.type === 'access')
+          return token
+      }
+      return null
+    }
+  }).unless({
     path: ['/users/login', '/users/verify/token']
   })
 )

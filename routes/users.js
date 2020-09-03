@@ -10,9 +10,19 @@ router.post('/login', function (req, res, next) {
   const data = req.body
   // validación
   res.send({
-    access: createToken(data)
+    access: createToken(data, 'access'),
+    refresh: createToken(data, 'refresh')
   })
 })
+
+router.post('/refresh/token', function (req, res, next) {
+  const token = req.body.token
+  console.log(token)
+  res.send({
+    access: createToken(data, 'access')
+  })
+})
+
 
 router.post('/verify/token', function (req, res, next) {
   const token = req.body.token
